@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Create New Course</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_category" class="form-label">Category</label>
+            {{ form.category }}
+            {% if form.category.errors %}
+                <div class="text-danger">{{ form.category.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_title" class="form-label">Title</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+                <div class="text-danger">{{ form.title.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_description" class="form-label">Description</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+                <div class="text-danger">{{ form.description.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_price" class="form-label">Price</label>
+            {{ form.price }}
+            {% if form.price.errors %}
+                <div class="text-danger">{{ form.price.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_thumbnail" class="form-label">Thumbnail</label>
+            {{ form.thumbnail }}
+            {% if form.thumbnail.errors %}
+                <div class="text-danger">{{ form.thumbnail.errors }}</div>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">Create Course</button>
+    </form>
+</div>
+{% endblock %}

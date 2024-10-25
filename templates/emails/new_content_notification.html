@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .header {
+        background-color: #f8f9fa;
+        padding: 20px;
+        text-align: center;
+      }
+      .content {
+        padding: 20px;
+      }
+      .button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h2>New Content Added!</h2>
+      </div>
+      <div class="content">
+        <p>Hello {{ student_name }},</p>
+        <p>
+          New content has been added to your enrolled course "{{ course_title
+          }}" by {{ instructor_name }}.
+        </p>
+        <p><strong>New Content:</strong> {{ content_title }}</p>
+        <p>Login to your account to check out the new material!</p>
+        <p>
+          <a href="{{ course_url }}" class="button">View Content</a>
+        </p>
+        <p>Happy learning!</p>
+      </div>
+    </div>
+  </body>
+</html>

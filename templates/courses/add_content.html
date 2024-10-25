@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Add Content to {{ course.title }}</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_title" class="form-label">Title</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+                <div class="text-danger">{{ form.title.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_content" class="form-label">Content</label>
+            {{ form.content }}
+            {% if form.content.errors %}
+                <div class="text-danger">{{ form.content.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_file" class="form-label">File (optional)</label>
+            {{ form.file }}
+            {% if form.file.errors %}
+                <div class="text-danger">{{ form.file.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="id_order" class="form-label">Order</label>
+            {{ form.order }}
+            {% if form.order.errors %}
+                <div class="text-danger">{{ form.order.errors }}</div>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">Add Content</button>
+    </form>
+</div>
+{% endblock %}

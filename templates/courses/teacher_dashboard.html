@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>Teacher Dashboard</h2>
+            <a href="{% url 'create_course' %}" class="btn btn-primary">Create New Course</a>
+        </div>
+    </div>
+
+    <!-- Statistics Overview -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Courses</h5>
+                    <h2 class="card-text">{{ total_courses }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Revenue</h5>
+                    <h2 class="card-text">${{ total_revenue }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course List -->
+    <div class="row">
+        {% for stat in course_stats %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ stat.course.title }}</h5>
+                    <div class="row">
+                        <div class="col-6">
+                            <p>Students: {{ stat.student_count }}</p>
+                            <p>Content Items: {{ stat.content_count }}</p>
+                            <p>Revenue: ${{ stat.revenue }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'course_detail' stat.course.slug %}" class="btn btn-primary">View Course</a>
+                        <a href="{% url 'manage_course_content' stat.course.slug %}" class="btn btn-secondary">Manage Content</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

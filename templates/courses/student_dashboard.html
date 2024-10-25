@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>My Courses</h2>
+        </div>
+    </div>
+
+    <!-- Enrolled Courses -->
+    <div class="row">
+        {% for progress in course_progress %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <img src="{{ progress.subscription.course.thumbnail.url }}" class="card-img-top" alt="{{ progress.subscription.course.title }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ progress.subscription.course.title }}</h5>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Instructor: {{ progress.subscription.course.instructor.get_full_name }}
+                        </small>
+                    </p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar" role="progressbar" style="width: {{ progress.completion_percentage }}%">
+                            {{ progress.completion_percentage }}%
+                        </div>
+                    </div>
+                    {% if progress.last_accessed %}
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Last accessed: {{ progress.last_accessed.title }}
+                        </small>
+                    </p>
+                    {% endif %}
+                    <a href="{% url 'course_detail' progress.subscription.course.slug %}" class="btn btn-primary">
+                        Continue Learning
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                You haven't enrolled in any courses yet.
+                <a href="{% url 'course_list' %}" class="alert-link">Browse Courses</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

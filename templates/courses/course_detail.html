@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h1>{{ course.title }}</h1>
+            <img src="{{ course.thumbnail.url }}" class="img-fluid mb-3" alt="{{ course.title }}">
+            <div class="course-description">
+                {{ course.description|linebreaks }}
+            </div>
+            
+            {% if is_subscribed or course.instructor == request.user %}
+            <div class="course-content mt-4">
+                <h3>Course Content</h3>
+                {% for content in course.contents.all %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ content.title }}</h5>
+                        <p class="card-text">{{ content.content|linebreaks }}</p>
+                        {% if content.file %}
+                        <a href="{{ content.file.url }}" class="btn btn-secondary" target="_blank">
+                            Download Material
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p>No content available yet.</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Course Information</h5>
+                    <p class="card-text">
+                        <strong>Instructor:</strong> {{ course.instructor.get_full_name }}
+                    </p>
+                    <p class="card-text">
+                        <strong>Category:</strong> {{ course.category.name }}
+                    </p>
+                    <p class="card-text">
+                        <strong>Price:</strong> ${{ course.price }}
+                    </p>
+                    
+                    {% if request.user.is_student %}
+                        {% if is_subscribed %}
+                        <div class="alert alert-success">
+                            You are enrolled in this course
+                        </div>
+                        {% else %}
+                        <div class="text-center">
+                            {{ paypal_form.render }}
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                    
+                    {% if course.instructor == request.user %}
+                    <div class="mt-3">
+                        <a href="{% url 'edit_course' course.slug %}" class="btn btn-primary">Edit Course</a>
+                        <a href="{% url 'add_course_content' course.slug %}" class="btn btn-success">Add Content</a>
+                        <a href="{% url 'delete_course' course.slug %}" class="btn btn-danger">Delete Course</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

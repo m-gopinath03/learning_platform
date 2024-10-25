@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Hero Section -->
+    <div class="jumbotron">
+        <h1 class="display-4">Welcome to Learning Platform</h1>
+        <p class="lead">Discover courses and start learning today!</p>
+        {% if not user.is_authenticated %}
+            <div class="mt-4">
+                <a href="{% url 'student_signup' %}" class="btn btn-primary mr-3">Sign Up as Student</a>
+                <a href="{% url 'teacher_signup' %}" class="btn btn-outline-primary">Sign Up as Teacher</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Featured Courses -->
+    <h2 class="mb-4">Featured Courses</h2>
+    <div class="row">
+        {% for course in featured_courses %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                {% if course.thumbnail %}
+                    <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="{{ course.title }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ course.title }}</h5>
+                    <p class="card-text">{{ course.description|truncatewords:20 }}</p>
+                    <p class="card-text"><small class="text-muted">${{ course.price }}</small></p>
+                    <a href="{% url 'course_detail' course.slug %}" class="btn btn-primary">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p>No courses available yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Categories -->
+    <h2 class="mb-4 mt-5">Browse Categories</h2>
+    <div class="row">
+        {% for category in categories %}
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ category.name }}</h5>
+                    <a href="{% url 'course_list' %}?category={{ category.id }}" class="btn btn-outline-primary">
+                        Browse Courses
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
