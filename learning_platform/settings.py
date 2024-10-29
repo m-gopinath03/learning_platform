@@ -211,8 +211,8 @@ DEFAULT_CURRENCY = 'USD'
 # PayPal Settings
 PAYPAL_RETURN_URL = 'http://127.0.0.1:8000/payment/process/'
 PAYPAL_CANCEL_URL = 'http://127.0.0.1:8000/payment/verify/'
-PAYPAL_CLIENT_ID = 'AZpchdfaocHBReHzS7ouaJZ88Pr30uP3434oblooqQ_d_d61H_HzK8WzwNGd9Igo-2W2ZBdFc1W-tDWv'
-PAYPAL_CLIENT_SECRET = 'EAJBFB7NR8LavCCWewHpsZvVGc0E3qNf3I_lRlbRudDlmrziM7b_-CH9xyW6dq8VosQnV4NudQTQbtZY'
+PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID")
+PAYPAL_CLIENT_SECRET = os.getenv("PAYPAL_CLIENT_SECRET")
 PAYPAL_SANDBOX = True  # Change to 'live' for production
 PAYPAL_RECEIVER_EMAIL = 'sb-uvswy33520538@business.example.com'
 PAYPAL_MODE = 'sandbox'  # Change to 'live' for production
