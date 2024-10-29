@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
+    'django_extensions', 
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Third party apps
@@ -55,10 +56,15 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'paypal.standard.ipn',
-    
-    # Local apps
-    'accounts',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
+    'drf_yasg',
     'courses',
+    'accounts',
+    'api',
+    'payment_gateway.apps.PaymentGatewayConfig',
+    'phonenumber_field',
 ]
 
 MIDDLEWARE = [
@@ -70,21 +76,51 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'allauth.account.middleware.AccountMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+]
+
+
+# REST Framework settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'EXCEPTION_HANDLER': 'api.exceptions.custom_exception_handler',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'LOGIN_URL': 'rest_framework:login',
+    'LOGOUT_URL': 'rest_framework:logout'
+}
+
+
+# CORS settings
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 
 ROOT_URLCONF = "learning_platform.urls"
 
 TEMPLATES = [
     {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'templates'],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            BASE_DIR / 'templates',
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -92,6 +128,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "learning_platform.wsgi.application"
 
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Token': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -125,8 +170,8 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGIN_REDIRECT_URL = 'dashboard_redirect'
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
-LOGOUT_REDIRECT_URL = '/'
-
+LOGOUT_REDIRECT_URL = 'home'
+LOGIN_URL = 'login'
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "UTC"
@@ -149,6 +194,10 @@ AUTHENTICATION_BACKENDS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Ensure these directories exist
+COURSE_THUMBNAIL_DIR = os.path.join(MEDIA_ROOT, 'course_thumbnails')
+if not os.path.exists(COURSE_THUMBNAIL_DIR):
+    os.makedirs(COURSE_THUMBNAIL_DIR)
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
@@ -156,10 +205,59 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Currency settings
+DEFAULT_CURRENCY = 'USD' 
 # PayPal settings
-PAYPAL_RECEIVER_EMAIL = config('PAYPAL_RECEIVER_EMAIL')
-PAYPAL_TEST = True
+# PayPal Settings
+PAYPAL_RETURN_URL = 'http://127.0.0.1:8000/payment/process/'
+PAYPAL_CANCEL_URL = 'http://127.0.0.1:8000/payment/verify/'
+PAYPAL_CLIENT_ID = 'AZpchdfaocHBReHzS7ouaJZ88Pr30uP3434oblooqQ_d_d61H_HzK8WzwNGd9Igo-2W2ZBdFc1W-tDWv'
+PAYPAL_CLIENT_SECRET = 'EAJBFB7NR8LavCCWewHpsZvVGc0E3qNf3I_lRlbRudDlmrziM7b_-CH9xyW6dq8VosQnV4NudQTQbtZY'
+PAYPAL_SANDBOX = True  # Change to 'live' for production
+PAYPAL_RECEIVER_EMAIL = 'sb-uvswy33520538@business.example.com'
+PAYPAL_MODE = 'sandbox'  # Change to 'live' for production
+PAYPAL_API_BASE = 'https://api-m.sandbox.paypal.com' if PAYPAL_MODE == 'sandbox' else 'https://api-m.paypal.com'
+PAYPAL_SDK_URL = 'https://www.paypal.com/sdk/js'
+PAYPAL_CURRENCY = 'USD'
+PAYMENT_VARIANTS = {
+    'paypal': ('payments.paypal.PaypalProvider', {
+        'client_id': PAYPAL_CLIENT_ID,
+        'secret': PAYPAL_CLIENT_SECRET,
+        'endpoint': 'https://api.sandbox.paypal.com' if PAYPAL_MODE == 'sandbox' else 'https://api.paypal.com',
+        'capture': True  # Auto-capture the payment
+    }),
+    'default': ('payments.dummy.DummyProvider', {})
+}
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Add PayPal's domain to CSRF trusted origins
+CSRF_TRUSTED_ORIGINS = [
+    "https://www.sandbox.paypal.com",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+            'level': 'DEBUG',
+        },
+    },
+    'loggers': {
+        '': {  # Root logger
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+        },
+    },
+}

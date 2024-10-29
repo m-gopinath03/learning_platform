@@ -9,6 +9,7 @@ from .forms import TeacherSignUpForm, StudentSignUpForm, OTPVerificationForm
 from .models import CustomUser
 from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 
 def generate_otp():
     return ''.join(random.choices(string.digits, k=6))
@@ -20,11 +21,20 @@ def send_otp_email(email, otp):
     recipient_list = [email]
     send_mail(subject, message, from_email, recipient_list)
 
-def teacher_signup(request):
+def register(request):
     if request.method == 'POST':
-        form = TeacherSignUpForm(request.POST)
+        user_type = request.POST.get('user_type')
+        
+        if user_type == 'teacher':
+            form = TeacherSignUpForm(request.POST)
+            template_user_type = 'Teacher'
+        else:
+            form = StudentSignUpForm(request.POST)
+            template_user_type = 'Student'
+            
         if form.is_valid():
             user = form.save()
+            # Generate and send OTP
             otp = generate_otp()
             user.otp = otp
             user.otp_created_at = timezone.now()
@@ -32,23 +42,20 @@ def teacher_signup(request):
             send_otp_email(user.email, otp)
             return redirect('verify_otp', user_id=user.id)
     else:
-        form = TeacherSignUpForm()
-    return render(request, 'accounts/signup.html', {'form': form, 'user_type': 'Teacher'})
-
-def student_signup(request):
-    if request.method == 'POST':
-        form = StudentSignUpForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            otp = generate_otp()
-            user.otp = otp
-            user.otp_created_at = timezone.now()
-            user.save()
-            send_otp_email(user.email, otp)
-            return redirect('verify_otp', user_id=user.id)
-    else:
-        form = StudentSignUpForm()
-    return render(request, 'accounts/signup.html', {'form': form, 'user_type': 'Student'})
+        # Default to student registration form
+        user_type = request.GET.get('type', 'student')
+        if user_type == 'teacher':
+            form = TeacherSignUpForm()
+            template_user_type = 'Teacher'
+        else:
+            form = StudentSignUpForm()
+            template_user_type = 'Student'
+    
+    return render(request, 'accounts/signup.html', {
+        'form': form,
+        'user_type': template_user_type,
+        'is_teacher_form': user_type == 'teacher'
+    })
 
 def verify_otp(request, user_id):
     try:
@@ -97,3 +104,26 @@ def dashboard_redirect(request):
         return redirect('student_dashboard')
     else:
         return redirect('home')
+
+
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect('home')
+
+@login_required
+def profile(request):
+    if request.method == 'POST':
+        # Handle profile update logic here
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('profile')
+    
+    return render(request, 'accounts/profile.html', {
+        'user': request.user
+    })
+
+@login_required
+def dashboard(request):
+    if request.user.is_teacher:
+        return redirect('teacher_dashboard')
+    return redirect('student_dashboard')

@@ -1,75 +1,51 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Manage Content for {{ course.title }}</h2>
-    <div class="list-group" id="content-list">
-        {% for content in contents %}
-        <div class="list-group-item d-flex justify-content-between align-items-center" data-id="{{ content.id }}">
-            <div>
-                <h5 class="mb-1">{{ content.title }}</h5>
-                <p class="mb-1">{{ content.content|truncatewords:20 }}</p>
-            </div>
-            <div>
-                <a href="{% url 'edit_course_content' content.id %}" class="btn btn-sm btn-primary">Edit</a>
-                <button class="btn btn-sm btn-danger" onclick="confirmDelete({{ content.id }})">Delete</button>
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Manage Content: {{ course.title }}</h1>
+            <div class="btn-group mb-3">
+                <a href="{% url 'teacher_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="{% url 'add_course_content' course.slug %}" class="btn btn-success">Add New Content</a>
             </div>
         </div>
-        {% empty %}
-        <p>No content available. <a href="{% url 'add_course_content' course.slug %}">Add new content</a>.</p>
-        {% endfor %}
     </div>
-    <a href="{% url 'add_course_content' course.slug %}" class="btn btn-success mt-3">Add New Content</a>
+
+    <!-- Content List -->
+    <div class="row">
+        <div class="col-12">
+            {% if content_list %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Title</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for content in content_list %}
+                            <tr>
+                                <td>{{ content.order }}</td>
+                                <td>{{ content.title }}</td>
+                                <td>
+                                    <a href="{% url 'edit_course_content' content.id %}" class="btn btn-sm btn-primary">Edit</a>
+                                    <a href="{% url 'delete_course_content' content.id %}" class="btn btn-sm btn-danger">Delete</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No content has been added to this course yet. 
+                    <a href="{% url 'add_course_content' course.slug %}" class="alert-link">Add your first content</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const contentList = document.getElementById('content-list');
-        if (contentList) {
-            new Sortable(contentList, {
-                animation: 150,
-                onEnd: function() {
-                    const newOrder = Array.from(contentList.children).map(item => item.dataset.id);
-                    
-                    // Send new order to server
-                    fetch(window.location.href, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-CSRFToken': '{{ csrf_token }}'
-                        },
-                        body: 'new_order=' + newOrder.join(',')
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            alert('Content order updated successfully');
-                        }
-                    });
-                }
-            });
-        }
-    });
-
-    function confirmDelete(contentId) {
-        if (confirm('Are you sure you want to delete this content?')) {
-            fetch(`/courses/content/${contentId}/delete/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    alert('Content deleted successfully');
-                    location.reload();
-                } else {
-                    alert('Failed to delete content');
-                }
-            });
-        }
-    }
-</script>
 {% endblock %}

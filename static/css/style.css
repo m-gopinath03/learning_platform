@@ -1,0 +1,80 @@
+/* General Styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Card Styles */
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Navigation */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Footer */
+.footer {
+    margin-top: auto;
+    padding: 1rem 0;
+    background-color: #f8f9fa;
+}
+
+/* Buttons */
+.btn-primary {
+    padding: 0.5rem 1.5rem;
+}
+
+/* Course Grid */
+.course-grid {
+    margin-top: 2rem;
+}
+
+/* Category Cards */
+.category-card {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/static/images/hero-bg.jpg');
+    background-size: cover;
+    color: white;
+    padding: 4rem 0;
+}
+
+/* Add these styles to your existing CSS */
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.invalid-feedback {
+    display: block;
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.form-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+} 

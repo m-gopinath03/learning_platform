@@ -1,58 +1,115 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="row">
-        <!-- Search and Filter Form -->
+        <!-- Sidebar with Categories -->
         <div class="col-md-3">
-            <form method="get" class="card p-3">
-                {{ form.as_p }}
-                <button type="submit" class="btn btn-primary">Search</button>
-            </form>
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Categories</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'course_list' %}" 
+                       class="list-group-item list-group-item-action {% if not request.GET.category %}active{% endif %}">
+                        All Courses
+                    </a>
+                    {% for category in categories %}
+                        <a href="{% url 'course_list' %}?category={{ category.id }}" 
+                           class="list-group-item list-group-item-action {% if request.GET.category == category.id|stringformat:'s' %}active{% endif %}">
+                            {{ category.name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
-        
-        <!-- Course List -->
+
+        <!-- Course Grid -->
         <div class="col-md-9">
+            <!-- Search Bar -->
+            <form method="get" class="mb-4">
+                <div class="input-group">
+                    <input type="text" name="query" class="form-control" 
+                           placeholder="Search courses..." 
+                           value="{{ search_query }}">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                    {% if search_query or request.GET.category %}
+                        <a href="{% url 'course_list' %}" class="btn btn-outline-secondary">Clear Filters</a>
+                    {% endif %}
+                </div>
+            </form>
+
+            <!-- Courses Grid -->
             <div class="row">
                 {% for course in courses %}
-                <div class="col-md-4 mb-4">
-                    <div class="card">
-                        <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="{{ course.title }}">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ course.title }}</h5>
-                            <p class="card-text">{{ course.description|truncatewords:20 }}</p>
-                            <p class="card-text"><small class="text-muted">${{ course.price }}</small></p>
-                            <a href="{% url 'course_detail' course.slug %}" class="btn btn-primary">View Details</a>
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            {% if course.thumbnail %}
+                                <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="{{ course.title }}"
+                                     style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <img src="{% static 'images/default-course.jpg' %}" class="card-img-top" alt="{{ course.title }}"
+                                     style="height: 200px; object-fit: cover;">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ course.title }}</h5>
+                                <p class="card-text text-muted">{{ course.description|truncatewords:15 }}</p>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-primary">{{ course.category.name }}</span>
+                                    <span class="text-success fw-bold">${{ course.price }}</span>
+                                </div>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        By {{ course.instructor.get_full_name|default:course.instructor.username }}
+                                    </small>
+                                </p>
+                            </div>
+                            <div class="card-footer bg-white border-top-0">
+                                <a href="{% url 'course_detail' course.slug %}" 
+                                   class="btn btn-primary w-100">View Details</a>
+                            </div>
                         </div>
                     </div>
-                </div>
                 {% empty %}
-                <div class="col-12">
-                    <p>No courses found.</p>
-                </div>
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            {% if search_query %}
+                                No courses found matching "{{ search_query }}".
+                            {% else %}
+                                No courses available at the moment.
+                            {% endif %}
+                        </div>
+                    </div>
                 {% endfor %}
             </div>
-            
+
             <!-- Pagination -->
-            {% if courses.has_other_pages %}
-            <nav aria-label="Page navigation">
+            {% if is_paginated %}
+            <nav aria-label="Page navigation" class="mt-4">
                 <ul class="pagination justify-content-center">
-                    {% if courses.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ courses.previous_page_number }}">Previous</a>
-                    </li>
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if search_query %}&query={{ search_query }}{% endif %}">Previous</a>
+                        </li>
                     {% endif %}
                     
-                    {% for num in courses.paginator.page_range %}
-                    <li class="page-item {% if courses.number == num %}active{% endif %}">
-                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                    </li>
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if search_query %}&query={{ search_query }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
                     {% endfor %}
                     
-                    {% if courses.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ courses.next_page_number }}">Next</a>
-                    </li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}{% if search_query %}&query={{ search_query }}{% endif %}">Next</a>
+                        </li>
                     {% endif %}
                 </ul>
             </nav>

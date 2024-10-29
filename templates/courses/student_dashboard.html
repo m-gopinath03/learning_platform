@@ -3,50 +3,50 @@
 {% block content %}
 <div class="container mt-4">
     <div class="row mb-4">
-        <div class="col-md-12">
+        <div class="col-md-8">
             <h2>My Courses</h2>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'course_list' %}" class="btn btn-primary">
+                <i class="fas fa-search"></i> Browse All Courses
+            </a>
         </div>
     </div>
 
-    <!-- Enrolled Courses -->
-    <div class="row">
-        {% for progress in course_progress %}
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <img src="{{ progress.subscription.course.thumbnail.url }}" class="card-img-top" alt="{{ progress.subscription.course.title }}">
-                <div class="card-body">
-                    <h5 class="card-title">{{ progress.subscription.course.title }}</h5>
-                    <p class="card-text">
-                        <small class="text-muted">
-                            Instructor: {{ progress.subscription.course.instructor.get_full_name }}
-                        </small>
-                    </p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar" role="progressbar" style="width: {{ progress.completion_percentage }}%">
-                            {{ progress.completion_percentage }}%
+    {% if subscriptions %}
+        <div class="row">
+            {% for subscription in subscriptions %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        {% if subscription.course.thumbnail %}
+                            <img src="{{ subscription.course.thumbnail.url }}" class="card-img-top" alt="{{ subscription.course.title }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ subscription.course.title }}</h5>
+                            <p class="card-text">{{ subscription.course.description|truncatewords:20 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{% url 'course_detail' subscription.course.slug %}" class="btn btn-primary">
+                                    Start Learning
+                                </a>
+                                <small class="text-muted">
+                                    Enrolled: {{ subscription.created_at|date:"M d, Y" }}
+                                </small>
+                            </div>
                         </div>
                     </div>
-                    {% if progress.last_accessed %}
-                    <p class="card-text">
-                        <small class="text-muted">
-                            Last accessed: {{ progress.last_accessed.title }}
-                        </small>
-                    </p>
-                    {% endif %}
-                    <a href="{% url 'course_detail' progress.subscription.course.slug %}" class="btn btn-primary">
-                        Continue Learning
-                    </a>
                 </div>
-            </div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="alert alert-info">
-                You haven't enrolled in any courses yet.
-                <a href="{% url 'course_list' %}" class="alert-link">Browse Courses</a>
-            </div>
+        
+        <div class="mt-4">
+            <h4>Summary</h4>
+            <p>Total Amount Spent: ${{ total_spent|floatformat:2 }}</p>
         </div>
-        {% endfor %}
-    </div>
+    {% else %}
+        <div class="alert alert-info">
+            You haven't enrolled in any courses yet. 
+            <a href="{% url 'course_list' %}" class="alert-link">Browse our course catalog</a> to get started!
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

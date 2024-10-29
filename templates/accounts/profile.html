@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Profile</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" value="{{ user.username }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" value="{{ user.email }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Account Type</label>
+                            <input type="text" class="form-control" 
+                                value="{% if user.is_teacher %}Teacher{% else %}Student{% endif %}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Join Date</label>
+                            <input type="text" class="form-control" value="{{ user.date_joined|date:'F j, Y' }}" readonly>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
