@@ -14,6 +14,7 @@ urlpatterns = [
         path('login/', account_views.LoginView.as_view(), name='api-login'),
         path('logout/', account_views.LogoutView.as_view(), name='api-logout'),
         path('register/', account_views.RegistrationView.as_view(), name='api-register'),
+        path('verify-otp/', account_views.VerifyOTPView.as_view(), name='verify_otp'),
     ])),
     path('courses/', include([
         path('<int:course_id>/enroll/', course_views.CourseEnrollmentView.as_view(), name='course-enroll'),

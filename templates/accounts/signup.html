@@ -10,11 +10,11 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-3 text-center">
-                        <a href="{% url 'register' %}?type=student" 
+                        <a href="{% url 'accounts:register' %}?type=student" 
                           class="btn btn-outline-primary {% if not is_teacher_form %}active{% endif %} me-2">
                             Student
                         </a>
-                        <a href="{% url 'register' %}?type=teacher" 
+                        <a href="{% url 'accounts:register' %}?type=teacher" 
                           class="btn btn-outline-primary {% if is_teacher_form %}active{% endif %}">
                             Teacher
                         </a>
@@ -40,7 +40,7 @@
                     </form>
 
                     <div class="mt-3 text-center">
-                        <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+                        <p>Already have an account? <a href="{% url 'accounts:login' %}">Login here</a></p>
                     </div>
                 </div>
             </div>

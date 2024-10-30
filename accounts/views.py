@@ -10,6 +10,7 @@ from .models import CustomUser
 from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
+from django.urls import reverse
 
 def generate_otp():
     return ''.join(random.choices(string.digits, k=6))
@@ -40,7 +41,8 @@ def register(request):
             user.otp_created_at = timezone.now()
             user.save()
             send_otp_email(user.email, otp)
-            return redirect('verify_otp', user_id=user.id)
+            verify_url = reverse('accounts:verify_otp', kwargs={'user_id': user.id})
+            return redirect(verify_url)
     else:
         # Default to student registration form
         user_type = request.GET.get('type', 'student')
@@ -73,18 +75,16 @@ def verify_otp(request, user_id):
                         user.email_verified = True
                         user.save()
                         
-                        # Specify the backend
-                        backend = get_backends()[0]  # Use the first backend
+                        backend = get_backends()[0]
                         user.backend = f"{backend.__module__}.{backend.__class__.__name__}"
                         
                         login(request, user)
                         messages.success(request, 'Email verified successfully')
                         
-                        # Redirect to the appropriate dashboard
                         if user.is_teacher:
-                            return redirect('teacher_dashboard')
+                            return redirect('accounts:teacher_dashboard')
                         elif user.is_student:
-                            return redirect('student_dashboard')
+                            return redirect('accounts:student_dashboard')
                     else:
                         messages.error(request, 'OTP expired')
                 else:

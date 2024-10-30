@@ -8,6 +8,8 @@ from django.contrib.auth import authenticate
 from accounts.models import CustomUser
 from ..serializers.account_serializers import UserSerializer, UserRegistrationSerializer
 from rest_framework.authtoken.models import Token
+from django.utils import timezone
+from datetime import timedelta
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
@@ -76,3 +78,51 @@ class UserViewSet(ModelViewSet):
             {'error': 'Invalid credentials'}, 
             status=status.HTTP_401_UNAUTHORIZED
         )
+class VerifyOTPView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        user_id = request.data.get('user_id')
+        otp = request.data.get('otp')
+
+        try:
+            user = CustomUser.objects.get(id=user_id)
+            
+            if user.email_verified:
+                return Response(
+                    {'message': 'Email already verified'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if user.otp == otp:
+                if user.otp_created_at + timedelta(minutes=10) >= timezone.now():
+                    user.email_verified = True
+                    user.save()
+                    
+                    # Create token for authenticated user
+                    token, _ = Token.objects.get_or_create(user=user)
+                    
+                    return Response({
+                        'message': 'Email verified successfully',
+                        'token': token.key,
+                        'user_id': user.id,
+                        'username': user.username,
+                        'is_teacher': user.is_teacher,
+                        'is_student': user.is_student
+                    })
+                else:
+                    return Response(
+                        {'error': 'OTP expired'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                return Response(
+                    {'error': 'Invalid OTP'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+        except CustomUser.DoesNotExist:
+            return Response(
+                {'error': 'User not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
